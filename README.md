@@ -6,6 +6,7 @@
 - evening S2 csv files refer to photos taken at 2pm, on light blue background
 - evening S2 csv files refer to photos taken at 5pm, on natural light (outdoor)
 - night S1 csv files refer to photos taken at 1am on light blue backround under lighting
+- night S2 csv files refer to photos taken at 9pm on yellow backround under lighting
 
 # Data/frames
 Here we you 'll find a sample of grey/rgb frames (letter B) for each session 
