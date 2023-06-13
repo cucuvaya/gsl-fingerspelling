@@ -1,12 +1,20 @@
 # PyTorch
 from torchvision import transforms, datasets, models
 import torch
+from torch.nn import (
+    Linear, ReLU, CrossEntropyLoss, Sequential, Conv2d, MaxPool2d, Module, Softmax,
+    BatchNorm2d, Dropout
+)
 from torch import optim, cuda
 from torch.utils.data import DataLoader, TensorDataset
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
 import glob
 from PIL import Image
+from sklearn import preprocessing
+from torchvision.models import VGG16_Weights
+from torch.optim import Adam
+from timeit import default_timer as timer
 
 # Data science tools
 import numpy as np
@@ -206,15 +214,19 @@ def train_model(model,criterion,optimizer,train_loader,valid_loader,save_file_na
 
             
 def gather_png():
-    transform = transforms.Compose([
-    transforms.PILToTensor()
-    ])
+
     def find_matching_string(input_string, string_list):
         for string in string_list:
             if string in input_string:
                 return string
         return None  
 
+    preprocess = transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
     dir_path = "rgb"
     # csv files in the path
     files = glob.glob(dir_path + "/*.png")
@@ -235,12 +247,6 @@ def gather_png():
         # reading content of csv file
         with open(filename, 'rb') as image:
             data = Image.open(image)
-            preprocess = transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            ])
             input_tensor = preprocess(data)
 
             content.append(input_tensor)
@@ -277,6 +283,7 @@ def main():
     checkpoint_path = 'vgg16-transfer.pth'
 
     # Change to fit hardware
+    #!CHECK
     batch_size = 50
 
     data_array, label_list=gather_png()
@@ -291,8 +298,6 @@ def main():
     train = TensorDataset(torch.tensor(train_x), torch.tensor(train_y).long())
     test = TensorDataset(torch.tensor(test_x), torch.tensor(test_y).long())
     val = TensorDataset(torch.tensor(val_x), torch.tensor(val_y).long())
-    #test = stack(tensors=(torch.tensor(test_x), torch.tensor(test_y)), dim=0)
-    #val = stack(tensors=(torch.tensor(val_x), torch.tensor(val_y)), dim=0)
     
     # Dataloader iterators
     dataloaders = {
@@ -314,7 +319,6 @@ def main():
     #Until here it works
     optimizer = Adam(model.parameters(), lr=0.01)
     criterion = CrossEntropyLoss()
-    print(dataloaders['train'])
 
     model, history = train_model(
         model,
