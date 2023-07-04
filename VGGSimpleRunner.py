@@ -1,22 +1,18 @@
 import os
-import numpy as np
 import sys
 import cv2
 from torchvision.models import VGG16_Weights
 import torchvision.models as models
 from PIL import Image
 import csv
-import os
 from torchvision import transforms
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import torch
-import cv2
 import mediapipe as mp
 from keras.models import load_model
 import numpy as np
 import time
 import pandas as pd
-import torch
 from torch.autograd import Variable
 from torch.nn import (
     Linear, ReLU, CrossEntropyLoss, Sequential, Conv2d, MaxPool2d, Module, Softmax,
@@ -24,31 +20,40 @@ from torch.nn import (
 )
 from torch.optim import Adam
 from MyCNN import Net
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score
-import csv
 from sklearn import preprocessing
 import glob
-import matplotlib.pyplot as plt
-from PIL import Image
+
 
 def main():
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = torch.load('vgg16-transfer.pth')
-    model.eval()
-    cap = cv2.VideoCapture(0)
-    _, frame = cap.read()
-    h, w, c = frame.shape
+    """ 1. initialize parameters and define which letters should recognize the model
+        2. load vgg16 model, which is located in current directory
+        3. start video capturing using cv2 library
+        4. press space to capture a photo ->
+           transform input photo (resize / crop / ..)
+        5. use the above output as input to our model and predict the letter
+        6. the letter will appear in terminal
+        7. this process (4-6) is repeated until user presses esc button
+    """
+
+    # initialize parameters
     analysisframe = ''
     letter_rgb_l = []
     letter_gray_l = []
     pixels_l = []
     le = preprocessing.LabelEncoder()
-    letters=['Gamma', 'Beta', 'Eta', 'Phi', 'Theta', 'Xi', 'Zeta']
+    letters = ['Gamma', 'Beta', 'Eta', 'Phi', 'Theta', 'Zeta']
     le.fit(letters)
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = torch.load('vgg16-transfer-final.pth')
+    model.eval()
+
+    cap = cv2.VideoCapture(0)
+    _, frame = cap.read()
+    # h, w, c = frame.shape
 
     while True:
         _, frame = cap.read()
@@ -75,12 +80,9 @@ def main():
             with torch.no_grad():
                 output = model(analysisframe.to(device))
             softmax = torch.exp(output)
-            #prob = list(softmax.numpy())
             predictions = torch.argmax(softmax, -1)
             letter = le.inverse_transform([predictions.item()])
             print(letter)
-
-            
 
         framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         cv2.imshow("Frame", frame)
