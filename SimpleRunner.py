@@ -1,10 +1,8 @@
 import os
 import numpy as np
-import sys
 import cv2
-from MyCNN import Net
+from MyCNN_batch import Net
 from PIL import Image
-import csv
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import torch
@@ -17,11 +15,11 @@ import pandas as pd
 import torch
 from torch.autograd import Variable
 from torch.nn import (
-    Linear, ReLU, CrossEntropyLoss, Sequential, Conv2d, MaxPool2d, Module, Softmax,
+    Linear, ReLU, CrossEntropyLoss, Sequential, Conv2d, MaxPool2d, Module,
     BatchNorm2d, Dropout
 )
+import torch.nn.functional as F
 from torch.optim import Adam
-from MyCNN import Net
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,7 +34,7 @@ import matplotlib.pyplot as plt
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = Net()
-    model.load_state_dict(torch.load('best-model_MyCNN-parameters.pt'))
+    model.load_state_dict(torch.load('Saved_models/4_CNN_1-16-32-6_lr-0.001_batch-1024_n_epochs-100_dropout-0/CNN_1-16-32-6_lr-0.001_batch-1024_n_epochs-100_dropout-0.pth'))
     model.eval()
     cap = cv2.VideoCapture(0)
     _, frame = cap.read()
@@ -46,7 +44,7 @@ def main():
     letter_gray_l = []
     pixels_l = []
     le = preprocessing.LabelEncoder()
-    letters=['Gamma', 'Beta', 'Eta', 'Phi', 'Theta', 'Xi', 'Zeta']
+    letters=['Gamma', 'Beta', 'Eta', 'Phi', 'Theta', 'Zeta']
     le.fit(letters)
 
     while True:
@@ -71,11 +69,25 @@ def main():
             device = next(model.parameters()).device
             with torch.no_grad():
                 output = model(analysisframe.to(device))
-            softmax = torch.exp(output)
-            #prob = list(softmax.numpy())
-            predictions = torch.argmax(softmax, -1)
-            letter = le.inverse_transform([predictions.item()])
-            print(letter)
+                
+            softmax = F.softmax(output, dim=1)
+            top_two_values, top_two_indices = torch.topk(softmax, k=2, dim=1)
+
+            # Convert tensors to lists
+            top_two_values = top_two_values.tolist()[0]
+            top_two_indices = top_two_indices.tolist()[0]
+
+            # Retrieve probabilities for the top two predictions
+            top_two_probabilities = [softmax[0, index].item() for index in top_two_indices]
+
+            print("\n Top two predictions:")
+            for rank, (value, index, probability) in enumerate(zip(top_two_values, top_two_indices, top_two_probabilities)):
+                if rank+1==2:
+                    indentation = "\t"
+                else:
+                    indentation = ""
+                    
+                print(f"{indentation} {rank+1}.Prediction: {le.inverse_transform([index])}, Probability: {probability:.2f}")
 
             
 

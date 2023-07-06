@@ -16,6 +16,7 @@ from keras.models import load_model
 import numpy as np
 import time
 import pandas as pd
+import torch.nn.functional as F
 import torch
 from torch.autograd import Variable
 from torch.nn import (
@@ -23,7 +24,6 @@ from torch.nn import (
     BatchNorm2d, Dropout
 )
 from torch.optim import Adam
-from MyCNN import Net
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ from PIL import Image
 
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = torch.load('vgg16-transfer.pth')
+    model = torch.load('vgg16-transfer-v4o.pth', map_location=torch.device('cpu'))
     model.eval()
     cap = cv2.VideoCapture(0)
     _, frame = cap.read()
@@ -47,7 +47,7 @@ def main():
     letter_gray_l = []
     pixels_l = []
     le = preprocessing.LabelEncoder()
-    letters=['Gamma', 'Beta', 'Eta', 'Phi', 'Theta', 'Xi', 'Zeta']
+    letters=['Gamma', 'Beta', 'Eta', 'Phi', 'Theta', 'Zeta']
     le.fit(letters)
 
     while True:
@@ -74,11 +74,25 @@ def main():
             device = next(model.parameters()).device
             with torch.no_grad():
                 output = model(analysisframe.to(device))
-            softmax = torch.exp(output)
-            #prob = list(softmax.numpy())
-            predictions = torch.argmax(softmax, -1)
-            letter = le.inverse_transform([predictions.item()])
-            print(letter)
+
+            softmax = F.softmax(output, dim=1)
+            top_two_values, top_two_indices = torch.topk(softmax, k=2, dim=1)
+
+            # Convert tensors to lists
+            top_two_values = top_two_values.tolist()[0]
+            top_two_indices = top_two_indices.tolist()[0]
+
+            # Retrieve probabilities for the top two predictions
+            top_two_probabilities = [softmax[0, index].item() for index in top_two_indices]
+
+            print("\n Top two predictions:")
+            for rank, (value, index, probability) in enumerate(zip(top_two_values, top_two_indices, top_two_probabilities)):
+                if rank+1==2:
+                    indentation = "\t"
+                else:
+                    indentation = ""
+                    
+                print(f"{indentation} {rank+1}.Prediction: {le.inverse_transform([index])}, Probability: {probability:.2f}")
 
             
 
