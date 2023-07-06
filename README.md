@@ -5,7 +5,7 @@ A Dataset has been created from scratch for 6 letters (Β, Γ, Η, Θ, Ζ, Φ). 
 
 Below we describe the conditions of each session per signer:
 
-# Data/pixels (user_1)
+## Data/pixels (user_1)
 - morning S1 csv files refer to photos taken at 11am, on white rib backround
 - morning S2 csv files refer to photos taken at 9am, on black dark backround
 - evening S2 csv files refer to photos taken at 2pm, on light blue background
@@ -13,7 +13,7 @@ Below we describe the conditions of each session per signer:
 - night S1 csv files refer to photos taken at 1am on light blue backround under lighting
 - night S2 csv files refer to photos taken at 9pm on yellow backround under lighting
 
-# Data/pixels (user_2)
+## Data/pixels (user_2)
 - morning S1 csv files refer to photos taken at 11am, on white rib backround
 - morning S2 csv files refer to photos taken at 9am, on black dark backround
 - evening S2 csv files refer to photos taken at 2pm, on light blue background
@@ -21,10 +21,12 @@ Below we describe the conditions of each session per signer:
 - night S1 csv files refer to photos taken at 1am on light blue backround under lighting
 - night S2 csv files refer to photos taken at 9pm on yellow backround under lighting
 
-## In terms of training process, the dataset has been splitted in 3 parts, train (70%) / test (10%) / validation (20%)
+### In terms of training process, the dataset has been splitted in 3 parts, train (70%) / test (10%) / validation (20%)
 Each part contains sessions with unique sessions, in order to avoid overfitting during training process.
 
-# Architechts used:
+
+
+# Architects used:
 
 ## CNN Model
 A CNN with 3 layers (1->16->32) has been implemented. Each convolutional layer consists of
@@ -34,13 +36,13 @@ A CNN with 3 layers (1->16->32) has been implemented. Each convolutional layer c
 - Dropout(d)
 - MaxPool2d(kernel=2, stride=2)
 
--- Final CNN model ran with the fllowing hyperparameters:
-Lr = 0.001
-batch_size = 1024
-n_epochs = 100 
-Patience = 15 
-Dropout = 0.
-No L2-Regularization
+**Final CNN model ran with the fllowing hyperparameters:**
+Lr = 0.001  
+batch_size = 1024  
+n_epochs = 100  
+Patience = 15  
+Dropout = 0.0  
+No L2-Regularization  
 
 
 ## VGG Model
