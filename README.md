@@ -3,6 +3,11 @@
 # Dataset
 A Dataset has been created from scratch for 6 letters (Β, Γ, Η, Θ, Ζ, Φ). Two signers captured frames for 2 days and 3 sessions per day (morning / evening / night). Final dataset consists of 5400 rgb photos (224x224), 5400 grayscale photos (28x28) and the corresponding csv files (a python script file has been used to convert grayscale to pixels). 
 
+## How to capture frames
+- Run script capture_frames.py
+- click space each time you want to capture a frame
+- click esc for saving frames and exit
+
 Below we describe the conditions of each session per signer:
 
 ## Data/pixels (user_1)
