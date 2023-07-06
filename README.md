@@ -31,7 +31,7 @@ Each part contains sessions with unique sessions, in order to avoid overfitting 
 
 
 
-# Architects used:
+# Architectures used:
 
 ## CNN Model
 A CNN with 3 layers (1->16->32) has been implemented. Each convolutional layer consists of
